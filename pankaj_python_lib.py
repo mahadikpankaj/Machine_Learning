@@ -93,3 +93,38 @@ def plot_heat_map(df, figsize=(10,10)):
     ax.set_xticklabels(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
     ax.set_yticklabels(ax.get_yticklabels(), rotation=45, verticalalignment='center')
     plt.show()
+
+def get_correlated_features_by_pearson_correlation(df_data, threshold=0.5):
+    features_final = set()
+    already_exists_list = []
+    numeric_features = set(df_data.select_dtypes(include=[np.number]).columns)
+    df_corr_orig = abs(df_data.corr(method='pearson'))
+    for target_col in numeric_features:
+        numeric_cols = df_data.select_dtypes(include=[np.number])
+        features_set = set()
+        features_related = set()
+        df_corr = df_corr_orig
+        selected_columns = list(df_corr.loc[[target_col], (df_corr[target_col] >= threshold)].columns)
+        selected_columns.remove(target_col)
+        df_corr = df_corr.loc[[target_col], selected_columns]
+        df_corr_cols = df_corr.columns
+        for i in range(len(df_corr_cols)):
+            features_set.clear()
+            features_related.clear()
+            f_name = df_corr_cols[i]
+            f_value = df_corr.iloc[0, i]
+            for j in range(i, len(df_corr_cols)):
+                if f_value < df_corr.iloc[0, j]:
+                    f_name, f_value = df_corr_cols[j], df_corr.iloc[0, j]
+                features_related.add(df_corr_cols[i])
+                features_related.add(df_corr_cols[j])
+            features_set.add(f_name)
+        if len(features_set)<1:
+            features_set.add(target_col)
+        features_related.add(target_col)
+        already_exists_list = [f for f in features_related if f in features_final]
+        if len(already_exists_list)>0:
+            features_set = already_exists_list
+        for f in features_set:
+            features_final.add(f)
+    return sorted(list(features_final))

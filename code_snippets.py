@@ -191,67 +191,51 @@ def normalize_with_minmax_scaler(df, col):
     minmax_scaler = MinMaxScaler()
     df[col] = minmax_scaler.fit_transform(df[col].values.reshape(-1, 1))
 
-def find_features_by_pearson_correlation(df, target_col, method='pearson', threshold=0.07):
-    numeric_cols = df.select_dtypes(include=[np.number])
-    if target_col not in(numeric_cols):
-        raise ValueError(f'{target_col} does not exist or is not numeric')
-        
-    features_set = set()
-    features_related = set()
-    df_corr = df.corr(method='pearson')
-
-    df_corr = df_corr[((abs(df_corr) >= 0.5))]
-    selected_columns = list(df_corr.loc[[target_col], ((abs(df_corr[target_col]) >= 0.5))].columns)
-    selected_columns.remove(target_col)
-
-    df_corr = df_corr.loc[[target_col], selected_columns]
-    df_corr = abs(df_corr)
-    df_corr_cols = df_corr.columns
-    for i in range(len(df_corr_cols)):
-        features_set.clear()
-        features_related.clear()
-        
-        f_name = df_corr_cols[i]
-        f_value = abs(df_corr.iloc[0, i])
-        for j in range(i, len(df_corr_cols)):
-            if df_corr_cols[i]!= df_corr_cols[j] and abs(abs(df_corr.iloc[0, i]) - abs(df_corr.iloc[0, j])) <= threshold:
-                if abs(f_value) < abs(df_corr.iloc[0, j]):
-                    f_name, f_value = (df_corr_cols[j], df_corr.iloc[0, j])
-            features_related.add(df_corr_cols[i])
-            features_related.add(df_corr_cols[j])
-        features_set.add(f_name)
-    if len(features_set)<1:
-        features_set.add(target_col)
-    features_related.add(target_col)
-    return sorted(list(features_set)), sorted(list(features_related))
 
 
-def find_correlated_features(df_data, numeric_features):
+
+
+def get_correlated_features_by_pearson_correlation(df_data, threshold=0.5):
     features_final = set()
-    for col in numeric_features:
-        feature_set, feature_related = find_features_by_pearson_correlation(df_data[numeric_features], col , threshold=0.01)
-
-        already_exists_list = [f for f in feature_related if f in features_final]
-
+    already_exists_list = []
+    numeric_features = set(df_data.select_dtypes(include=[np.number]).columns)
+    df_corr_orig = abs(df_data.corr(method='pearson'))
+    for target_col in numeric_features:
+        numeric_cols = df_data.select_dtypes(include=[np.number])
+        features_set = set()
+        features_related = set()
+        df_corr = df_corr_orig
+        selected_columns = list(df_corr.loc[[target_col], (df_corr[target_col] >= threshold)].columns)
+        selected_columns.remove(target_col)
+        df_corr = df_corr.loc[[target_col], selected_columns]
+        df_corr_cols = df_corr.columns
+        for i in range(len(df_corr_cols)):
+            features_set.clear()
+            features_related.clear()
+            f_name = df_corr_cols[i]
+            f_value = df_corr.iloc[0, i]
+            for j in range(i, len(df_corr_cols)):
+                if f_value < df_corr.iloc[0, j]:
+                    f_name, f_value = df_corr_cols[j], df_corr.iloc[0, j]
+                features_related.add(df_corr_cols[i])
+                features_related.add(df_corr_cols[j])
+            features_set.add(f_name)
+        if len(features_set)<1:
+            features_set.add(target_col)
+        features_related.add(target_col)
+        already_exists_list = [f for f in features_related if f in features_final]
         if len(already_exists_list)>0:
-            feature_set = already_exists_list
-
-        for f in feature_set:
+            features_set = already_exists_list
+        for f in features_set:
             features_final.add(f)
-            feature_related.remove(f)
-
-    #    for f in feature_related:
-     #       features_numeric_to_check.remove(f)
-
-    #    print()
-    #    print(col, ' == ', feature_set, ' == ', feature_related)
-    #print('========================================')
-    correlated_features_list = sorted(list(features_final))
-    return correlated_features_list
+    return sorted(list(features_final))
 
 
-features_correlated = find_correlated_features(df_loan, features_numeric)
-features_correlated
+features_correlated = get_correlated_features_by_pearson_correlation(df_loan, threshold=0.6)
+len(features_correlated), len(df_loan.select_dtypes(include=[np.number]).columns)
+
+
+
 
 
 #1 custom grid, adjusted range of values on y-axis
