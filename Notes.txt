@@ -1,0 +1,31 @@
+Feature/Response    Continuous                  Categorical
+Continuous          Pearson's Co-orelation          LDA
+Categorical         ANOVA                           Chi-Square
+
+
+Fill missing values
+MinMaxScaler
+StandardScaler
+PCA, LDA dimentionality reduction
+
+
+various models
+
+cross validation to parameter tuning
+
+accuracy, precision, recall, f1_score, AUC (area under Receiver Operating Characteristic curve)
+
+
+
+import csv to dataframe
+sort columns
+drop dupolicates
+drop na/Fill na
+
+check if the values in target variable are proportional. If biased, use SMOTE to resample data.
+
+find categorical, discrete features
+find discrete features in numeric features
+date conversion
+bin (pd.cut/pd.qcut) continuous variables
+one-hot or category-encode categorical features

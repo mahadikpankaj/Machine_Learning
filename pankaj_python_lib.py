@@ -100,12 +100,12 @@ def get_correlated_features_by_pearson_correlation(df_data, threshold=0.5):
     numeric_features = set(df_data.select_dtypes(include=[np.number]).columns)
     df_corr_orig = abs(df_data.corr(method='pearson'))
     for target_col in numeric_features:
-        numeric_cols = df_data.select_dtypes(include=[np.number])
         features_set = set()
         features_related = set()
         df_corr = df_corr_orig
         selected_columns = list(df_corr.loc[[target_col], (df_corr[target_col] >= threshold)].columns)
-        selected_columns.remove(target_col)
+        if target_col in selected_columns:
+            selected_columns.remove(target_col)
         df_corr = df_corr.loc[[target_col], selected_columns]
         df_corr_cols = df_corr.columns
         for i in range(len(df_corr_cols)):
