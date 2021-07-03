@@ -128,3 +128,28 @@ def get_correlated_features_by_pearson_correlation(df_data, threshold=0.5):
         for f in features_set:
             features_final.add(f)
     return sorted(list(features_final))
+    
+def plot_decision_boundary(model, X, y):
+
+    amin, bmin = X.min(axis=0) - 0.1
+    amax, bmax = X.max(axis=0) + 0.1
+    hticks = np.linspace(amin, amax, 500)
+    vticks = np.linspace(bmin, bmax, 500)
+    
+    aa, bb = np.meshgrid(hticks, vticks)
+    ab = np.c_[aa.ravel(), bb.ravel()]
+    
+    # make prediction with the model and reshape the output so contourf can plot it
+    y_pred_enc = model.predict(ab)
+
+    y_pred_enc = np.round(y_pred_enc)
+    y_pred=np.array([np.argmax(y, axis=None, out=None) for y in y_pred_enc])
+    Z = y_pred.reshape(aa.shape)
+
+    fig = plt.figure(figsize=(8, 6))
+    ax1 = fig.add_subplot(1, 1, 1)
+    # plot the contour
+    cntr1 = ax1.contourf(aa, bb, Z, cmap='Pastel1', alpha=0.8)
+#    ax1.clabel(cntr1, inline=True, fontsize=10, use_clabeltext=True, colors='b')
+    ax1.scatter(X[:, 0], X[:, 1], c=y, cmap='Dark2', ec='darkgrey', marker='o', s=50)
+    return plt
