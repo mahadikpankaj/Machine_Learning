@@ -113,7 +113,7 @@ def get_correlated_features_by_pearson_correlation(df_data, threshold=0.5):
             features_related.clear()
             f_name = df_corr_cols[i]
             f_value = df_corr.iloc[0, i]
-            for j in range(i, len(df_corr_cols)):
+            for j in range(0, len(df_corr_cols)):
                 if f_value < df_corr.iloc[0, j]:
                     f_name, f_value = df_corr_cols[j], df_corr.iloc[0, j]
                 features_related.add(df_corr_cols[i])
