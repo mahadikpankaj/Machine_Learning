@@ -771,7 +771,7 @@ plt.show()
 
 
 ------------------------------------------------------
-def plot_decision_boundary(model, X, y):
+def plot_decision_boundary(model, X, y, y_predicted=None):
 
     amin, bmin = X.min(axis=0) - 0.1
     amax, bmax = X.max(axis=0) + 0.1
@@ -788,12 +788,16 @@ def plot_decision_boundary(model, X, y):
     y_pred=np.array([np.argmax(y, axis=None, out=None) for y in y_pred_enc])
     Z = y_pred.reshape(aa.shape)
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(12, 10))
     ax1 = fig.add_subplot(1, 1, 1)
-    # plot the contour
-    cntr1 = ax1.contourf(aa, bb, Z, cmap='Pastel1', alpha=0.8)
+    cntr1 = ax1.contourf(aa, bb, Z, cmap='Pastel1', alpha=0.2)
 #    ax1.clabel(cntr1, inline=True, fontsize=10, use_clabeltext=True, colors='b')
-    ax1.scatter(X[:, 0], X[:, 1], c=y, cmap='Dark2', ec='darkgrey', marker='o', s=50)
+    
+    if y_predicted is not None:
+        ax1.scatter(X[:, 0], X[:, 1], c=y, cmap='Dark2', ec='silver', marker='H', s=100, alpha=0.9)
+        ax1.scatter(X[:, 0], X[:, 1], c=y_predicted, cmap='Dark2', ec='silver', marker='o', s=50)
+    else:
+        ax1.scatter(X[:, 0], X[:, 1], c=y, cmap='Dark2', ec='silver', marker='H', s=100)
     return plt
 ---------------------------
 encoded_fig = plt.figure()
